@@ -23,6 +23,7 @@ Option Explicit
 ' http://www.popbill.com
 ' Author : Jeong Yohan (code@linkhub.co.kr)
 ' Written : 2019-12-20
+' Updated : 2020-06-03
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -134,10 +135,10 @@ Public Property Let IPRestrictOnOff(ByVal value As Boolean)
     m_IPRestrictOnOff = value
 End Property
 '초기화
-Public Sub Initialize(LinkID As String, SecretKey As String)
+Public Sub Initialize(linkID As String, SecretKey As String)
     Set m_Linkhub = New Linkhub
     
-    m_Linkhub.LinkID = LinkID
+    m_Linkhub.linkID = linkID
     m_Linkhub.SercetKey = SecretKey
     
     m_scope.Add "member"
@@ -512,19 +513,19 @@ ErrHandler:
 End Function
 
 '회원가입 여부
-Public Function CheckIsMember(CorpNum As String, LinkID As String) As PBResponse
+Public Function CheckIsMember(CorpNum As String, linkID As String) As PBResponse
 On Error GoTo ErrHandler
     If CorpNum = "" Then
         Err.Raise -99999999, "POPBILL", "팝빌회원의 사업자번호가 입력되지 않았습니다."
     End If
 
-    If LinkID = "" Then
+    If linkID = "" Then
         Err.Raise -99999999, "POPBILL", "링크아이디(LinkID)가 입력되지 않았습니다."
     End If
     
     Dim result As Variant
     
-    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + LinkID, "")
+    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + linkID, "")
     
     Set CheckIsMember = New PBResponse
     CheckIsMember.code = result.Item("code")
@@ -545,7 +546,7 @@ On Error GoTo ErrHandler
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "LinkID", JoinInfo.LinkID
+    tmp.Add "LinkID", JoinInfo.linkID
     tmp.Add "CorpNum", JoinInfo.CorpNum
     tmp.Add "CorpName", JoinInfo.corpName
     tmp.Add "CEOName", JoinInfo.ceoname
@@ -593,6 +594,215 @@ ErrHandler:
     m_LastErrMessage = Err.Description
     Set GetCorpInfo = Nothing
 End Function
+
+
+Public Function RegistBankAccount(CorpNum As String, AccountInfo As PBEasyFinBankAccountForm, Optional UserID As String = "") As PBResponse
+On Error GoTo ErrHandler
+
+    If AccountInfo.BankCode = "" Then
+        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+    End If
+    
+    If AccountInfo.AccountNumber = "" Then
+        Err.Raise -99999999, "POPBILL", "계좌번호가 입력되지 않았습니다."
+    End If
+    
+    
+    Set RegistBankAccount = Nothing
+    
+    Dim postdata As String
+    Dim uri As String
+    Dim tmp
+    
+    uri = "/EasyFin/Bank/BankAccount/Regist"
+    
+    If AccountInfo.UsePeriod <> "" Then
+        uri = uri + "?UsePeriod=" + AccountInfo.UsePeriod
+    End If
+    
+    Set tmp = CreateObject("Scripting.Dictionary")
+    
+    tmp.Add "BankCode", AccountInfo.BankCode
+    tmp.Add "AccountNumber", AccountInfo.AccountNumber
+    tmp.Add "AccountPWD", AccountInfo.AccountPWD
+    tmp.Add "AccountType", AccountInfo.AccountType
+    tmp.Add "IdentityNumber", AccountInfo.IdentityNumber
+    tmp.Add "AccountName", AccountInfo.AccountName
+    tmp.Add "BankID", AccountInfo.BankID
+    tmp.Add "FastID", AccountInfo.FastID
+    tmp.Add "FastPWD", AccountInfo.FastPWD
+    tmp.Add "Memo", AccountInfo.Memo
+    
+    postdata = m_Linkhub.toString(tmp)
+    
+    Dim result As Variant
+    
+    Set result = httpPOST(uri, getSession_token(CorpNum), postdata)
+    
+    Set RegistBankAccount = New PBResponse
+    
+    RegistBankAccount.code = result.Item("code")
+    RegistBankAccount.Message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+
+Public Function UpdateBankAccount(CorpNum As String, AccountInfo As PBEasyFinBankAccountForm, Optional UserID As String = "") As PBResponse
+On Error GoTo ErrHandler
+
+    If AccountInfo.BankCode = "" Then
+        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+    End If
+    
+    If AccountInfo.AccountNumber = "" Then
+        Err.Raise -99999999, "POPBILL", "계좌번호가 입력되지 않았습니다."
+    End If
+    
+    
+    Set UpdateBankAccount = Nothing
+    
+    Dim postdata As String
+    Dim uri As String
+    Dim tmp
+    
+    uri = "/EasyFin/Bank/BankAccount/" + AccountInfo.BankCode + "/" + AccountInfo.AccountNumber + "/Update"
+        
+    Set tmp = CreateObject("Scripting.Dictionary")
+    
+    tmp.Add "AccountPWD", AccountInfo.AccountPWD
+    tmp.Add "AccountName", AccountInfo.AccountName
+    tmp.Add "BankID", AccountInfo.BankID
+    tmp.Add "FastID", AccountInfo.FastID
+    tmp.Add "FastPWD", AccountInfo.FastPWD
+    tmp.Add "Memo", AccountInfo.Memo
+    
+    postdata = m_Linkhub.toString(tmp)
+    
+    Dim result As Variant
+    
+    Set result = httpPOST(uri, getSession_token(CorpNum), postdata)
+    
+    Set UpdateBankAccount = New PBResponse
+    
+    UpdateBankAccount.code = result.Item("code")
+    UpdateBankAccount.Message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+
+
+Public Function CloseBankAccount(CorpNum As String, BankCode As String, AccountNumber As String, CloseType As String, Optional UserID As String = "") As PBResponse
+On Error GoTo ErrHandler
+
+    If BankCode = "" Then
+        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+    End If
+    
+    If AccountNumber = "" Then
+        Err.Raise -99999999, "POPBILL", "계좌번호가 입력되지 않았습니다."
+    End If
+    
+    If CloseType = "" Then
+        Err.Raise -99999999, "POPBILL", "정액제 해지유형이 입력되지 않았습니다."
+    End If
+    
+    If CloseType <> "일반" And CloseType <> "중도" Then
+        Err.Raise -99999999, "POPBILL", "정액제 해지유형이 올바르지 않습니다."
+    End If
+    
+    
+    Set CloseBankAccount = Nothing
+    
+    Dim postdata As String
+    Dim uri As String
+    Dim tmp
+    
+    uri = "/EasyFin/Bank/BankAccount/Close"
+    uri = uri + "?BankCode=" + BankCode
+    uri = uri + "&AccountNumber=" + AccountNumber
+    uri = uri + "&CloseType=" + URLEncode(CloseType)
+        
+    Dim result As Variant
+    
+    Set result = httpPOST(uri, getSession_token(CorpNum), "")
+    
+    Set CloseBankAccount = New PBResponse
+    
+    CloseBankAccount.code = result.Item("code")
+    CloseBankAccount.Message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+
+Public Function RevokeCloseBankAccount(CorpNum As String, BankCode As String, AccountNumber As String, Optional UserID As String = "") As PBResponse
+On Error GoTo ErrHandler
+
+    If BankCode = "" Then
+        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+    End If
+    
+    If AccountNumber = "" Then
+        Err.Raise -99999999, "POPBILL", "계좌번호가 입력되지 않았습니다."
+    End If
+    
+    Set RevokeCloseBankAccount = Nothing
+    
+    Dim postdata As String
+    Dim uri As String
+    Dim tmp
+    
+    uri = "/EasyFin/Bank/BankAccount/RevokeClose"
+    uri = uri + "?BankCode=" + BankCode
+    uri = uri + "&AccountNumber=" + AccountNumber
+        
+    Dim result As Variant
+    
+    Set result = httpPOST(uri, getSession_token(CorpNum), "")
+    
+    Set RevokeCloseBankAccount = New PBResponse
+    
+    RevokeCloseBankAccount.code = result.Item("code")
+    RevokeCloseBankAccount.Message = result.Item("message")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+
+Public Function GetBankAccountInfo(CorpNum As String, BankCode As String, AccountNumber As String, Optional UserID As String = "") As PBEasyFinBankAccount
+On Error GoTo ErrHandler
+
+    Dim result As Variant
+    
+    If BankCode = "" Then
+        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+    End If
+    
+    If AccountNumber = "" Then
+        Err.Raise -99999999, "POPBILL", "계좌번호가 입력되지 않았습니다."
+    End If
+    
+    Set result = httpGET("/EasyFin/Bank/BankAccount/" + BankCode + "/" + AccountNumber, getSession_token(CorpNum), UserID)
+    
+    Set GetBankAccountInfo = New PBEasyFinBankAccount
+    
+    GetBankAccountInfo.fromDictionary result
+    
+    Exit Function
+    
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set GetBankAccountInfo = Nothing
+End Function
+
+
 
 Public Function GetChargeInfo(CorpNum As String, Optional UserID As String = "") As PBChargeInfo
 On Error GoTo ErrHandler
@@ -813,11 +1023,11 @@ ErrHandler:
     GetBankAccountMgtURL = ""
 End Function
 
-Public Function SaveMemo(CorpNum As String, TID As String, Memo As String, Optional UserID As String = "") As PBResponse
+Public Function SaveMemo(CorpNum As String, tid As String, Memo As String, Optional UserID As String = "") As PBResponse
 On Error GoTo ErrHandler
     Dim result As Variant
     
-    Set result = httpPOST("/EasyFin/Bank/SaveMemo?TID=" + TID + "&Memo=" + URLEncode(Memo), getSession_token(CorpNum), "", UserID)
+    Set result = httpPOST("/EasyFin/Bank/SaveMemo?TID=" + tid + "&Memo=" + URLEncode(Memo), getSession_token(CorpNum), "", UserID)
     
     Set SaveMemo = New PBResponse
     SaveMemo.code = result.Item("code")

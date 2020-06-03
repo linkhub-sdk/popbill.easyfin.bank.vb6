@@ -21,6 +21,14 @@ Public state       As Integer
 Public regDT       As String
 Public memo        As String
 
+Public contractDT        As String
+Public useEndDate         As String
+Public baseDate         As Integer
+Public contractState            As Integer
+Public closeRequestYN   As Boolean
+Public useRestrictYN    As Boolean
+Public closeOnExpired   As Boolean
+Public unPaidYN         As Boolean
 
 Public Sub fromDictionary(dic As Variant)
     accountNumber = dic.Item("accountNumber")
@@ -30,5 +38,14 @@ Public Sub fromDictionary(dic As Variant)
     state = dic.Item("state")
     regDT = dic.Item("regDT")
     memo = dic.Item("memo")
+    
+    contractDT = dic.Item("contractDT")
+    useEndDate = dic.Item("useEndDate")
+    baseDate = dic.Item("baseDate")
+    contractState = dic.Item("contractState")
+    closeRequestYN = dic.Item("closeRequestYN")
+    useRestrictYN = dic.Item("useRestrictYN")
+    closeOnExpired = dic.Item("closeOnExpired")
+    unPaidYN = dic.Item("unPaidYN")
 End Sub
 
