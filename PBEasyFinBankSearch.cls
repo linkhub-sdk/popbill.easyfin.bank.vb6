@@ -20,6 +20,7 @@ Public total         As Integer    '총 검색결과 건수
 Public perPage       As Integer    '페이지당 검색개수
 Public pageNum       As Integer    '페이지 번호
 Public pageCount     As Integer    '페이지 개수
+Public lastScrapDT     As String    '페이지 개수
 
 Public list As Collection          '전자(세금)계산서 목록, PBHTTaxinvoiceAbbr.cls 참고
 
@@ -32,6 +33,7 @@ Public Sub fromDictionary(dic As Variant)
     pageNum = dic.Item("pageNum")
     pageCount = dic.Item("pageCount")
     Message = dic.Item("message")
+    lastScrapDT = dic.Item("lastScrapDT")
         
     Dim tCollection As Collection
     
