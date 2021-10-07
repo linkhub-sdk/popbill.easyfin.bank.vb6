@@ -834,6 +834,11 @@ On Error GoTo ErrHandler
     
     Set result = httpPOST(uri, getSession_token(CorpNum), postdata, UserID)
     
+    Set DeleteBankAccount = New PBResponse
+    
+    DeleteBankAccount.code = result.Item("code")
+    DeleteBankAccount.Message = result.Item("message")
+    
     Exit Function
 ErrHandler:
     m_LastErrCode = Err.Number
