@@ -843,6 +843,7 @@ On Error GoTo ErrHandler
 ErrHandler:
     m_LastErrCode = Err.Number
     m_LastErrMessage = Err.Description
+    Set DeleteBankAccount = Nothing
 End Function
 
 Public Function GetBankAccountInfo(CorpNum As String, BankCode As String, AccountNumber As String, Optional UserID As String = "") As PBEasyFinBankAccount
