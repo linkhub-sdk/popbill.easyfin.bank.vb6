@@ -808,6 +808,38 @@ ErrHandler:
     m_LastErrMessage = Err.Description
 End Function
 
+Public Function DeleteBankAccount(CorpNum As String, BankCode As String, AccountNumber As String, Optional UserID As String = "") As PBResponse
+On Error GoTo ErrHandler
+
+    If BankCode = "" Then
+        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+    End If
+    
+    If AccountNumber = "" Then
+        Err.Raise -99999999, "POPBILL", "계좌번호가 입력되지 않았습니다."
+    End If
+    
+    Dim uri As String
+    uri = "/EasyFin/Bank/BankAccount/Delete"
+    
+    Dim tmp
+    Set tmp = CreateObject("Scripting.Dictionary")
+    tmp.Add "BankCode", BankCode
+    tmp.Add "AccountNumber", AccountNumber
+    
+    Dim postdata As String
+    postdata = m_Linkhub.toString(tmp)
+    
+    Dim result As Variant
+    
+    Set result = httpPOST(uri, getSession_token(CorpNum), postdata, UserID)
+    
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+End Function
+
 Public Function GetBankAccountInfo(CorpNum As String, BankCode As String, AccountNumber As String, Optional UserID As String = "") As PBEasyFinBankAccount
 On Error GoTo ErrHandler
 
