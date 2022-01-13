@@ -155,10 +155,10 @@ Public Property Let UseLocalTimeYN(ByVal value As Boolean)
 End Property
 
 '초기화
-Public Sub Initialize(LinkID As String, SecretKey As String)
+Public Sub Initialize(linkID As String, SecretKey As String)
     Set m_Linkhub = New Linkhub
     
-    m_Linkhub.LinkID = LinkID
+    m_Linkhub.linkID = linkID
     m_Linkhub.SercetKey = SecretKey
     
     m_scope.Add "member"
@@ -223,12 +223,12 @@ Private Function getSession_token(CorpNum As String) As String
 
 End Function
 
-Private Function httpGET(url As String, BearerToken As String, Optional UserID As String = "") As Variant
+Private Function httpGET(URL As String, BearerToken As String, Optional UserID As String = "") As Variant
      
     Dim winhttp1
     
     Set winhttp1 = CreateObject("MSXML2.XMLHTTP.6.0")
-    Call winhttp1.Open("GET", getTargetURL() + url, False)
+    Call winhttp1.Open("GET", getTargetURL() + URL, False)
     
     Call winhttp1.setRequestHeader("Authorization", "Bearer " + BearerToken)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
@@ -262,17 +262,17 @@ Private Function httpGET(url As String, BearerToken As String, Optional UserID A
 
 End Function
 
-Private Function httpPOST(url As String, BearerToken As String, postData As String, Optional UserID As String) As Variant
-    Set httpPOST = httpPOST_override(url, BearerToken, "", postData, UserID)
+Private Function httpPOST(URL As String, BearerToken As String, postData As String, Optional UserID As String) As Variant
+    Set httpPOST = httpPOST_override(URL, BearerToken, "", postData, UserID)
     
 End Function
 
-Private Function httpPOST_override(url As String, BearerToken As String, override As String, postData As String, Optional UserID As String) As Variant
+Private Function httpPOST_override(URL As String, BearerToken As String, override As String, postData As String, Optional UserID As String) As Variant
      
     Dim winhttp1
     
     Set winhttp1 = CreateObject("MSXML2.XMLHTTP.6.0")
-    Call winhttp1.Open("POST", getTargetURL() + url, False)
+    Call winhttp1.Open("POST", getTargetURL() + URL, False)
     Call winhttp1.setRequestHeader("x-pb-version", APIVersion)
     Call winhttp1.setRequestHeader("Accept-Encoding", "gzip,deflate")
     
@@ -571,20 +571,50 @@ ErrHandler:
    GetChargeURL = ""
 End Function
 
+'팝빌 연동회원 포인트 결제내역 팝업 URL
+Public Function GetPaymentURL(CorpNum As String, UserID As String) As String
+On Error GoTo ErrHandler
+    Dim result As Variant
+    
+    Set result = httpGET("/?TG=PAYMENT", getSession_token(CorpNum), UserID)
+    
+    GetPaymentURL = result.Item("url")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    GetPaymentURL = ""
+End Function
+
+'팝빌 연동회원 포인트 사용내역 팝업 URL
+Public Function GetUseHistoryURL(CorpNum As String, UserID As String) As String
+On Error GoTo ErrHandler
+    Dim result As Variant
+    
+    Set result = httpGET("/?TG=USEHISTORY", getSession_token(CorpNum), UserID)
+    
+    GetUseHistoryURL = result.Item("url")
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    GetUseHistoryURL = ""
+End Function
+
 '회원가입 여부
-Public Function CheckIsMember(CorpNum As String, LinkID As String) As PBResponse
+Public Function CheckIsMember(CorpNum As String, linkID As String) As PBResponse
 On Error GoTo ErrHandler
     If CorpNum = "" Then
         Err.Raise -99999999, "POPBILL", "팝빌회원의 사업자번호가 입력되지 않았습니다."
     End If
 
-    If LinkID = "" Then
+    If linkID = "" Then
         Err.Raise -99999999, "POPBILL", "링크아이디(LinkID)가 입력되지 않았습니다."
     End If
     
     Dim result As Variant
     
-    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + LinkID, "")
+    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + linkID, "")
     
     Set CheckIsMember = New PBResponse
     CheckIsMember.code = result.Item("code")
@@ -605,7 +635,7 @@ On Error GoTo ErrHandler
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "LinkID", JoinInfo.LinkID
+    tmp.Add "LinkID", JoinInfo.linkID
     tmp.Add "CorpNum", JoinInfo.CorpNum
     tmp.Add "CorpName", JoinInfo.corpName
     tmp.Add "CEOName", JoinInfo.ceoname
