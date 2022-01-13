@@ -23,7 +23,7 @@ Option Explicit
 ' http://www.popbill.com
 ' Author : Jeong Yohan (code@linkhub.co.kr)
 ' Written : 2019-12-20
-' Updated : 2021-10-07
+' Updated : 2021-01-13
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -155,10 +155,10 @@ Public Property Let UseLocalTimeYN(ByVal value As Boolean)
 End Property
 
 '초기화
-Public Sub Initialize(linkID As String, SecretKey As String)
+Public Sub Initialize(LinkID As String, SecretKey As String)
     Set m_Linkhub = New Linkhub
     
-    m_Linkhub.linkID = linkID
+    m_Linkhub.LinkID = LinkID
     m_Linkhub.SercetKey = SecretKey
     
     m_scope.Add "member"
@@ -262,12 +262,12 @@ Private Function httpGET(url As String, BearerToken As String, Optional UserID A
 
 End Function
 
-Private Function httpPOST(url As String, BearerToken As String, postdata As String, Optional UserID As String) As Variant
-    Set httpPOST = httpPOST_override(url, BearerToken, "", postdata, UserID)
+Private Function httpPOST(url As String, BearerToken As String, postData As String, Optional UserID As String) As Variant
+    Set httpPOST = httpPOST_override(url, BearerToken, "", postData, UserID)
     
 End Function
 
-Private Function httpPOST_override(url As String, BearerToken As String, override As String, postdata As String, Optional UserID As String) As Variant
+Private Function httpPOST_override(url As String, BearerToken As String, override As String, postData As String, Optional UserID As String) As Variant
      
     Dim winhttp1
     
@@ -290,7 +290,7 @@ Private Function httpPOST_override(url As String, BearerToken As String, overrid
     
     Call winhttp1.setRequestHeader("Content-Type", "Application/json")
     
-    winhttp1.Send (postdata)
+    winhttp1.Send (postData)
         
     Dim Response As String
     Response = winhttp1.responseText
@@ -334,6 +334,32 @@ ErrHandler:
     m_LastErrMessage = Err.Description
     Set CheckID = Nothing
 End Function
+
+'연동회원 담당자 정보확인
+Public Function GetContactInfo(CorpNum As String, ContactID As String, Optional UserID As String = "") As PBContactInfo
+On Error GoTo ErrHandler
+    Dim result As Variant
+    Dim postData As String
+    
+    Dim tmp
+    Set tmp = CreateObject("Scripting.Dictionary")
+    
+    tmp.Add "id", ContactID
+            
+    postData = m_Linkhub.toString(tmp)
+    
+    
+    Set result = httpPOST("/Contact", getSession_token(CorpNum), postData, UserID)
+    
+    Set GetContactInfo = New PBContactInfo
+    GetContactInfo.fromDictionary result
+    
+    Exit Function
+ErrHandler:
+    m_LastErrCode = Err.Number
+    m_LastErrMessage = Err.Description
+    Set GetContactInfo = Nothing
+End Function
 '연동회원 담당자 목록조회
 Public Function ListContact(CorpNum As String, Optional UserID As String = "") As Collection
 On Error GoTo ErrHandler
@@ -367,7 +393,7 @@ Public Function RegistContact(CorpNum As String, ContactInfo As PBContactInfo, O
 On Error GoTo ErrHandler
     Set RegistContact = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim tmp
     
     Set tmp = CreateObject("Scripting.Dictionary")
@@ -382,11 +408,11 @@ On Error GoTo ErrHandler
     tmp.Add "searchAllAllowYN", ContactInfo.searchAllAllowYN
     tmp.Add "mgrYN", ContactInfo.mgrYN
             
-    postdata = m_Linkhub.toString(tmp)
+    postData = m_Linkhub.toString(tmp)
     
     Dim result As Variant
     
-    Set result = httpPOST("/IDs/New", getSession_token(CorpNum), postdata)
+    Set result = httpPOST("/IDs/New", getSession_token(CorpNum), postData)
     
     Set RegistContact = New PBResponse
     
@@ -402,7 +428,7 @@ Public Function UpdateContact(CorpNum As String, ContactInfo As PBContactInfo, U
 On Error GoTo ErrHandler
     Set UpdateContact = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim tmp
     
     Set tmp = CreateObject("Scripting.Dictionary")
@@ -416,11 +442,11 @@ On Error GoTo ErrHandler
     tmp.Add "searchAllAllowYN", ContactInfo.searchAllAllowYN
     tmp.Add "mgrYN", ContactInfo.mgrYN
             
-    postdata = m_Linkhub.toString(tmp)
+    postData = m_Linkhub.toString(tmp)
     
     Dim result As Variant
     
-    Set result = httpPOST("/IDs", getSession_token(CorpNum), postdata, UserID)
+    Set result = httpPOST("/IDs", getSession_token(CorpNum), postData, UserID)
     
     Set UpdateContact = New PBResponse
     
@@ -436,7 +462,7 @@ Public Function UpdateCorpInfo(CorpNum As String, CorpInfo As PBCorpInfo, Option
 On Error GoTo ErrHandler
     Set UpdateCorpInfo = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim tmp
     
     Set tmp = CreateObject("Scripting.Dictionary")
@@ -447,11 +473,11 @@ On Error GoTo ErrHandler
     tmp.Add "bizType", CorpInfo.bizType
     tmp.Add "bizClass", CorpInfo.bizClass
             
-    postdata = m_Linkhub.toString(tmp)
+    postData = m_Linkhub.toString(tmp)
     
     Dim result As Variant
     
-    Set result = httpPOST("/CorpInfo", getSession_token(CorpNum), postdata, UserID)
+    Set result = httpPOST("/CorpInfo", getSession_token(CorpNum), postData, UserID)
     
     Set UpdateCorpInfo = New PBResponse
     
@@ -546,19 +572,19 @@ ErrHandler:
 End Function
 
 '회원가입 여부
-Public Function CheckIsMember(CorpNum As String, linkID As String) As PBResponse
+Public Function CheckIsMember(CorpNum As String, LinkID As String) As PBResponse
 On Error GoTo ErrHandler
     If CorpNum = "" Then
         Err.Raise -99999999, "POPBILL", "팝빌회원의 사업자번호가 입력되지 않았습니다."
     End If
 
-    If linkID = "" Then
+    If LinkID = "" Then
         Err.Raise -99999999, "POPBILL", "링크아이디(LinkID)가 입력되지 않았습니다."
     End If
     
     Dim result As Variant
     
-    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + linkID, "")
+    Set result = httpGET("/Join?CorpNum=" + CorpNum + "&LID=" + LinkID, "")
     
     Set CheckIsMember = New PBResponse
     CheckIsMember.code = result.Item("code")
@@ -574,12 +600,12 @@ Public Function JoinMember(JoinInfo As PBJoinForm) As PBResponse
 On Error GoTo ErrHandler
     Set JoinMember = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim tmp
     
     Set tmp = CreateObject("Scripting.Dictionary")
     
-    tmp.Add "LinkID", JoinInfo.linkID
+    tmp.Add "LinkID", JoinInfo.LinkID
     tmp.Add "CorpNum", JoinInfo.CorpNum
     tmp.Add "CorpName", JoinInfo.corpName
     tmp.Add "CEOName", JoinInfo.ceoname
@@ -595,11 +621,11 @@ On Error GoTo ErrHandler
     tmp.Add "ID", JoinInfo.id
     tmp.Add "PWD", JoinInfo.pwd
     
-    postdata = m_Linkhub.toString(tmp)
+    postData = m_Linkhub.toString(tmp)
     
     Dim result As Variant
     
-    Set result = httpPOST("/Join", "", postdata)
+    Set result = httpPOST("/Join", "", postData)
     
     Set JoinMember = New PBResponse
     
@@ -643,7 +669,7 @@ On Error GoTo ErrHandler
     
     Set RegistBankAccount = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim uri As String
     Dim tmp
     
@@ -666,11 +692,11 @@ On Error GoTo ErrHandler
     tmp.Add "FastPWD", AccountInfo.FastPWD
     tmp.Add "Memo", AccountInfo.Memo
     
-    postdata = m_Linkhub.toString(tmp)
+    postData = m_Linkhub.toString(tmp)
     
     Dim result As Variant
     
-    Set result = httpPOST(uri, getSession_token(CorpNum), postdata)
+    Set result = httpPOST(uri, getSession_token(CorpNum), postData)
     
     Set RegistBankAccount = New PBResponse
     
@@ -696,7 +722,7 @@ On Error GoTo ErrHandler
     
     Set UpdateBankAccount = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim uri As String
     Dim tmp
     
@@ -711,11 +737,11 @@ On Error GoTo ErrHandler
     tmp.Add "FastPWD", AccountInfo.FastPWD
     tmp.Add "Memo", AccountInfo.Memo
     
-    postdata = m_Linkhub.toString(tmp)
+    postData = m_Linkhub.toString(tmp)
     
     Dim result As Variant
     
-    Set result = httpPOST(uri, getSession_token(CorpNum), postdata)
+    Set result = httpPOST(uri, getSession_token(CorpNum), postData)
     
     Set UpdateBankAccount = New PBResponse
     
@@ -750,7 +776,7 @@ On Error GoTo ErrHandler
     
     Set CloseBankAccount = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim uri As String
     Dim tmp
     
@@ -786,7 +812,7 @@ On Error GoTo ErrHandler
     
     Set RevokeCloseBankAccount = Nothing
     
-    Dim postdata As String
+    Dim postData As String
     Dim uri As String
     Dim tmp
     
@@ -827,12 +853,12 @@ On Error GoTo ErrHandler
     tmp.Add "BankCode", BankCode
     tmp.Add "AccountNumber", AccountNumber
     
-    Dim postdata As String
-    postdata = m_Linkhub.toString(tmp)
+    Dim postData As String
+    postData = m_Linkhub.toString(tmp)
     
     Dim result As Variant
     
-    Set result = httpPOST(uri, getSession_token(CorpNum), postdata, UserID)
+    Set result = httpPOST(uri, getSession_token(CorpNum), postData, UserID)
     
     Set DeleteBankAccount = New PBResponse
     
