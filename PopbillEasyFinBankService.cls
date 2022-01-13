@@ -400,6 +400,7 @@ On Error GoTo ErrHandler
     
     tmp.Add "id", ContactInfo.id
     tmp.Add "pwd", ContactInfo.pwd
+    tmp.Add "Password", ContactInfo.Password
     tmp.Add "personName", ContactInfo.personName
     tmp.Add "tel", ContactInfo.tel
     tmp.Add "hp", ContactInfo.hp
@@ -407,6 +408,7 @@ On Error GoTo ErrHandler
     tmp.Add "email", ContactInfo.email
     tmp.Add "searchAllAllowYN", ContactInfo.searchAllAllowYN
     tmp.Add "mgrYN", ContactInfo.mgrYN
+    tmp.Add "searchRole", ContactInfo.searchRole
             
     postData = m_Linkhub.toString(tmp)
     
@@ -441,6 +443,7 @@ On Error GoTo ErrHandler
     tmp.Add "email", ContactInfo.email
     tmp.Add "searchAllAllowYN", ContactInfo.searchAllAllowYN
     tmp.Add "mgrYN", ContactInfo.mgrYN
+    tmp.Add "searchRole", ContactInfo.searchRole
             
     postData = m_Linkhub.toString(tmp)
     
@@ -650,6 +653,7 @@ On Error GoTo ErrHandler
     tmp.Add "ContactTEL", JoinInfo.ContactTEL
     tmp.Add "ID", JoinInfo.id
     tmp.Add "PWD", JoinInfo.pwd
+    tmp.Add "Password", JoinInfo.Password
     
     postData = m_Linkhub.toString(tmp)
     
