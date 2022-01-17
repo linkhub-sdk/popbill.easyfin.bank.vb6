@@ -23,7 +23,7 @@ Option Explicit
 ' http://www.popbill.com
 ' Author : Jeong Yohan (code@linkhub.co.kr)
 ' Written : 2019-12-20
-' Updated : 2021-01-13
+' Updated : 2022-01-17
 '
 ' Thanks for your interest.
 '=================================================================================
@@ -693,7 +693,7 @@ Public Function RegistBankAccount(CorpNum As String, AccountInfo As PBEasyFinBan
 On Error GoTo ErrHandler
 
     If AccountInfo.BankCode = "" Then
-        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+        Err.Raise -99999999, "POPBILL", "기관코드가 입력되지 않았습니다."
     End If
     
     If AccountInfo.AccountNumber = "" Then
@@ -746,7 +746,7 @@ Public Function UpdateBankAccount(CorpNum As String, AccountInfo As PBEasyFinBan
 On Error GoTo ErrHandler
 
     If AccountInfo.BankCode = "" Then
-        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+        Err.Raise -99999999, "POPBILL", "기관코드가 입력되지 않았습니다."
     End If
     
     If AccountInfo.AccountNumber = "" Then
@@ -792,7 +792,7 @@ Public Function CloseBankAccount(CorpNum As String, BankCode As String, AccountN
 On Error GoTo ErrHandler
 
     If BankCode = "" Then
-        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+        Err.Raise -99999999, "POPBILL", "기관코드가 입력되지 않았습니다."
     End If
     
     If AccountNumber = "" Then
@@ -837,7 +837,7 @@ Public Function RevokeCloseBankAccount(CorpNum As String, BankCode As String, Ac
 On Error GoTo ErrHandler
 
     If BankCode = "" Then
-        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+        Err.Raise -99999999, "POPBILL", "기관코드가 입력되지 않았습니다."
     End If
     
     If AccountNumber = "" Then
@@ -872,7 +872,7 @@ Public Function DeleteBankAccount(CorpNum As String, BankCode As String, Account
 On Error GoTo ErrHandler
 
     If BankCode = "" Then
-        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+        Err.Raise -99999999, "POPBILL", "기관코드가 입력되지 않았습니다."
     End If
     
     If AccountNumber = "" Then
@@ -912,7 +912,7 @@ On Error GoTo ErrHandler
     Dim result As Variant
     
     If BankCode = "" Then
-        Err.Raise -99999999, "POPBILL", "은행코드가 입력되지 않았습니다."
+        Err.Raise -99999999, "POPBILL", "기관코드가 입력되지 않았습니다."
     End If
     
     If AccountNumber = "" Then
